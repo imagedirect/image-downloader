@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+# Bash $ `python image-downloader.py file.csv`
+
 import csv
 import shutil
 import sys
@@ -47,14 +49,21 @@ def fix_url(url):
 
 def download_csv_row_images(row, dest_dir):
     for key in row:
+
+        # logging.info(key)
+
         start_url = row['web-scraper-start-url']
         id = row['web-scraper-order']
-
-        if key.endswith("-src"):
+        # added pdf tuplet (end cell header with pdf)
+        if key.endswith(("-src", "pdf")):
             image_url = row[key]
+            # Indexing from front and end minus four chars file extension
+            # ext is added based upon mime content_type
+            file_name = image_url[0:-4]
             image_url = urljoin(start_url, image_url)
 
-            image_filename = "%s-%s" % (id, key[0:-4])
+            # image_filename = "%s-%s" % (id, key[0:-4])
+            image_filename = "%s" % (file_name)
             download_image(image_url, dest_dir, image_filename)
 
 
@@ -75,6 +84,9 @@ def download_image(image_url, dest_dir, image_filename):
             ext = 'gif'
         elif content_type == 'image/webp':
             ext = 'webp'
+            # Adding PDF
+        elif content_type == 'application/pdf':
+            ext = 'pdf'
         else:
             logging.warning("unknown image content type %s" % content_type)
             return
